@@ -7,7 +7,7 @@ Operationalizes qualitative themes into Likert-scale measurement items and forma
 
 import os
 import pandas as pd
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Tuple
 from ..nlp_thematic.ontology import CONCEPTUAL_HYPOTHESES
 
 # Operationalized Measurement Items mapped from qualitative themes

@@ -1,0 +1,12 @@
+.git/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+outputs/*.xlsx
+outputs/*.csv
+outputs/figures/
+scratch/
+.Cocos/
+.VPNMaster/
+.VirtualBox/
