@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<Project xmlns="http://www.qsrinternational.com/nvivo/codebook">
+  <Codes>
+    <Code name="Physical Constraints" description="Tangible, environmental, and interpersonal threats to bodily safety, physical integrity, and personal security.">
+      <Code name="Sexual Harassment &amp; Unwanted Attention" description="Catcalling, leering, persistent staring, stalking, groping, sexual comments, and invasive male pursuit." frequency="9"/>
+      <Code name="Infrastructure &amp; Transit Vulnerability" description="Risks associated with public transport, taxis, dark alleys, isolated bus stops, poor lighting, and locked spaces." frequency="7"/>
+      <Code name="Accommodation &amp; Property Security" description="Vulnerabilities in hostels, hotels, vacation rentals, door locks, ground floor rooms, and drink safety." frequency="21"/>
+    </Code>
+    <Code name="Social Constraints" description="Socio-cultural, patriarchal, normative, and familial restrictions placed on women's autonomous mobility.">
+      <Code name="Patriarchal Gaze &amp; Cultural Norms" description="Conservative societal norms, dress policing, male dominance in public space, and gender discrimination." frequency="6"/>
+      <Code name="Familial Anxiety &amp; Societal Judgment" description="Family disapproval, paternalistic protection, fear of victim blaming, and warnings from social circles." frequency="5"/>
+      <Code name="Racialized &amp; Foreign Vulnerability" description="Vulnerabilities stemming from race, ethnicity, language barriers, and stereotyping of foreign women." frequency="9"/>
+    </Code>
+    <Code name="Constraint Negotiation &amp; Coping Strategies" description="Proactive and reactive behavioral adaptations, micro-strategies, and tools women employ to navigate risk.">
+      <Code name="Behavioral &amp; Presentation Adaptation" description="Altering physical appearance, simulated social ties, purposeful walking, and eye-contact management." frequency="2"/>
+      <Code name="Digital &amp; Communication Tactics" description="Leveraging digital tools, location tracking, fake calls, emergency numbers, and backup documentation." frequency="9"/>
+      <Code name="Spatial &amp; Temporal Planning" description="Daylight movement planning, curfew discipline, neighborhood vetting, and transport scheduling." frequency="3"/>
+      <Code name="Intuition &amp; Situational Awareness" description="Trusting gut feelings, peripheral alertness, reading atmospheric cues, and knowing when to exit situations." frequency="6"/>
+    </Code>
+    <Code name="Perceived Safety" description="Subjective cognitive and emotional state of feeling secure, guarded, vulnerable, or at ease in travel spaces.">
+      <Code name="Subjective Security vs. Vulnerability" description="Dynamic sense of personal safety, fluctuating between calm assurance and heightened vigilance." frequency="24"/>
+      <Code name="Objective vs. Perceived Risk Calibration" description="Deconstructing sensationalized media reports versus the lived reality of everyday safety on the ground." frequency="3"/>
+    </Code>
+    <Code name="Destination Image &amp; Evaluation" description="Consumer perception of destination safety reputation, institutional trust, and host community hospitableness.">
+      <Code name="Destination Safety Reputation" description="Public and peer perception of a country or city as women-friendly, safe, or hazardous." frequency="11"/>
+      <Code name="Institutional &amp; Police Trust" description="Confidence in local law enforcement, tourist police, emergency healthcare, and public governance." frequency="3"/>
+    </Code>
+    <Code name="Travel Intention &amp; Mobility Decisions" description="Conative outcomes: destination choice, itinerary modifications, travel avoidance, and future solo travel intentions.">
+      <Code name="Destination Choice &amp; Route Avoidance" description="Selecting or boycotting destinations, canceling trips, or altering routes due to safety considerations." frequency="10"/>
+      <Code name="Solo Continuation &amp; Advocacy" description="Commitment to future solo travel and recommending solo journeys to other women." frequency="12"/>
+    </Code>
+    <Code name="Experiential Well-Being &amp; Self-Leadership" description="Psychological and transformative outcomes: self-efficacy, autonomy, empowerment, confidence, and flourishing.">
+      <Code name="Empowerment &amp; Self-Efficacy" description="Enhanced sense of agency, pride, capability, self-reliance, and self-leadership through overcoming fear." frequency="25"/>
+      <Code name="Emotional Flourishing &amp; Joy" description="Deep psychological well-being, mindfulness, flow, serenity, and joy experienced during independent travel." frequency="4"/>
+    </Code>
+  </Codes>
+</Project>
