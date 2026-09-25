@@ -1,0 +1,210 @@
+================================================================================
+QUALITATIVE RESEARCH ANALYSIS SYSTEM — COMPREHENSIVE USER MANUAL & OPERATIONAL GUIDE
+Study Focus: Perceived Safety of Solo Women Travellers
+Methodology: Braun & Clarke (2006) 6-Stage Thematic Analysis Framework
+================================================================================
+
+TABLE OF CONTENTS
+--------------------------------------------------------------------------------
+1. Introduction & Research Philosophy
+2. System Quick-Start & Access
+3. Workspace Navigation Overview
+4. Section-by-Section User Guide:
+   4.1  Overview Dashboard
+   4.2  Upload Data (Ingestion & Direct Output Tables)
+   4.3  Documents Repository & Familiarisation Summaries
+   4.4  Initial Coding & Evidence Traceability
+   4.5  Codebook Management
+   4.6  Candidate Themes & Sub-Themes Review
+   4.7  Blog vs Interview Comparative Analysis
+   4.8  Conceptual Framework Mapping
+   4.9  Validation Audit & Metric Tracking
+   4.10 Blind Model Testing Workflow
+   4.11 Export & Academic Reports
+5. Operational Best Practices & Troubleshooting
+================================================================================
+
+
+1. INTRODUCTION & RESEARCH PHILOSOPHY
+--------------------------------------------------------------------------------
+Welcome to the Qualitative Research Analysis Workspace. This system is designed 
+specifically to assist academic researchers in conducting rigorous qualitative 
+thematic analysis on data regarding "Perceived Safety of Solo Women Travellers".
+
+Core Operational Principle:
+    "The AI proposes. The evidence supports. The researcher validates."
+
+The system strictly enforces Braun & Clarke's (2006) six-stage methodology:
+  Stage 1: Familiarisation with the data
+  Stage 2: Generating initial codes
+  Stage 3: Searching for themes
+  Stage 4: Reviewing themes
+  Stage 5: Defining and naming themes
+  Stage 6: Producing the report
+
+Dataset Architecture:
+  - Cohort A (Blogs): ~40 publicly available solo-travel blog posts written by women.
+  - Cohort B (Interviews): ~50 semi-structured interview transcripts with international women students.
+  - Phase 3 (Survey): Quantitative SEM questionnaire operationalized from qualitative themes.
+
+
+2. SYSTEM QUICK-START & ACCESS
+--------------------------------------------------------------------------------
+- Local Access: Open any web browser and navigate to `http://127.0.0.1:8000`
+- Production / Vercel Host: Navigate to your Vercel deployment URL (e.g., `https://up-gamma-two.vercel.app`)
+- Interface Aesthetic: Monochromatic black & white high-contrast light theme with sharp 0px corners 
+  and clean outline SVG icons.
+
+
+3. WORKSPACE NAVIGATION OVERVIEW
+--------------------------------------------------------------------------------
+The permanent left-hand sidebar gives immediate access to 11 dedicated functional modules:
+  [1]  Overview           -> Project command center & Braun & Clarke pipeline stepper
+  [2]  Upload Data        -> File ingestion, text parsing, and direct output tables
+  [3]  Documents          -> Catalog of all 90 study documents & familiarisation drawers
+  [4]  Initial Coding     -> Passage-level evidence quotes with full document traceability
+  [5]  Codebook           -> Dynamic code definitions, frequency counts & status toggles
+  [6]  Themes             -> Higher-order thematic clusters, merging, splitting & renaming
+  [7]  Blog vs Interviews -> Side-by-side convergence, divergence & cohort synthesis
+  [8]  Framework Mapping  -> Mapping evidence to Physical/Social Constraints & Well-Being
+  [9]  Validation Audit   -> Researcher override audit trail & precision/recall/F1 metrics
+  [10] Model Testing      -> Blind reliability testing against benchmark validation samples
+  [11] Export & Reports   -> One-click downloads for Excel, NVivo XML, Survey CSV & Report
+
+
+4. SECTION-BY-SECTION USER GUIDE
+--------------------------------------------------------------------------------
+
+4.1 OVERVIEW DASHBOARD
+--------------------------------------------------------------------------------
+- Purpose: Provides a real-time summary of project progress, corpus statistics, and methodology pipeline.
+- How to Use:
+  1. Review Top Stat Cards: Check Total Documents (40 Blogs / 50 Interviews), Words Analyzed, 
+     Initial Codes Generated, and Final Themes.
+  2. Inspect the Stepper: Monitor the 8-step pipeline indicator (Ingestion -> Familiarisation -> 
+     Initial Coding -> Codebook -> Themes -> Review & Compare -> Framework & Validate -> Report).
+  3. Analyze Construct Frequency Distribution: View horizontal bars displaying the frequency 
+     of the 7 theoretical constructs across all coded text.
+
+4.2 UPLOAD DATA (INGESTION & DIRECT OUTPUT TABLES)
+--------------------------------------------------------------------------------
+- Purpose: Upload raw research documents and immediately view full qualitative analysis output tables.
+- Step-by-Step Instructions:
+  1. Click on the "Upload Data" sidebar item.
+  2. Drag & Drop your research file (PDF, DOCX, TXT, HTML, or CSV) onto the upload drop zone, 
+     or click to browse your local computer.
+  3. Select Dataset Classification: Choose "Public Travel Blog Post (40 Cohort)" or 
+     "Semi-structured Interview Transcript (50 Cohort)".
+  4. Click "Process & Code Document". The live progress bar will track parsing, segmentation, 
+     and hybrid ML coding.
+  5. Review Direct Output Tables (Rendered directly under Ingestion & Coding Results):
+     - Table A (Document Metrics): Filename, Doc ID, Title, Type, Word Count, Paragraph Count, Density %, Dominant Construct.
+     - Table B (Construct Frequency Breakdown): Construct Name, Segment Frequency, Percentage, Definition.
+     - Table C (Key Evidence Quotes): Primary Construct, Sub-dimension, Verbatim Quote, Confidence Score, Emotional Tone.
+  6. Click "Download Full Document Excel Report" to export a standalone .xlsx for this document.
+
+4.3 DOCUMENTS REPOSITORY & FAMILIARISATION SUMMARIES
+--------------------------------------------------------------------------------
+- Purpose: Manage the study corpus and complete Stage 1 (Familiarisation) of Braun & Clarke.
+- Step-by-Step Instructions:
+  1. Use the Search Bar to search for documents by ID (e.g., BLOG_01, INT_04) or Title.
+  2. Use Filters to narrow down by Dataset Type (Blogs Only / Interviews Only) or Status.
+  3. Click the "Familiarisation" button on any row.
+  4. In the pop-up drawer, review structured insights:
+     - Main Experience
+     - Destination & Traveller Context
+     - Key Safety Concerns & Emotional Responses
+     - Positive & Negative Lived Experiences
+
+4.4 INITIAL CODING & EVIDENCE TRACEABILITY
+--------------------------------------------------------------------------------
+- Purpose: Inspect passage-level qualitative coding and verify exact document origin.
+- Step-by-Step Instructions:
+  1. Filter by Construct (e.g., Physical Constraints, Perceived Safety, Well-Being) or source type.
+  2. Use the keyword search box to search for specific terms (e.g., "night transport", "fake ring").
+  3. Examine each Coded Card:
+     - Read verbatim quotation.
+     - Check Document Traceability: Source Document ID (e.g., BLOG_01) and Paragraph Number (e.g., Paragraph #19).
+     - Inspect ML Metadata: Confidence score, emotional tone, and matched indicator keywords.
+
+4.5 CODEBOOK MANAGEMENT
+--------------------------------------------------------------------------------
+- Purpose: Review, refine, approve, or reject qualitative codes generated by the model.
+- Step-by-Step Instructions:
+  1. Scroll through the Dynamic Codebook table.
+  2. Inspect fields: Code Name, Theoretical Definition, Verbatim Evidence Sample, Construct, 
+     Frequency, Document Reach, Confidence.
+  3. Approve or Reject: Click "Approve" to validate a code for inclusion in theme clustering, 
+     or click "Reject" to exclude it.
+
+4.6 CANDIDATE THEMES & SUB-THEMES REVIEW
+--------------------------------------------------------------------------------
+- Purpose: Group initial codes into broader theoretical themes and execute Stage 4 & 5 review.
+- Step-by-Step Instructions:
+  1. Review Theme Cards: Examine Theme Name, Definition, Subthemes, Related Codes, 
+     Blog Frequency, Interview Frequency, and Verbatim Evidence Count.
+  2. Approve Theme: Click "Approve Theme" to confirm candidate theme into final findings.
+  3. Reject Theme: Click "Reject" to discard a weak or redundant theme.
+  4. Rename Theme: Click "Rename", enter your custom researcher title, and submit.
+
+4.7 BLOG VS INTERVIEW COMPARATIVE ANALYSIS
+--------------------------------------------------------------------------------
+- Purpose: Compare public voluntary narratives against direct personal interview transcripts.
+- Step-by-Step Instructions:
+  1. Read the Comparative Synthesis summary box.
+  2. Examine the Cross-Dataset Table:
+     - Compare presence in Blog Cohort (Public) vs Interview Cohort (Personal).
+     - Check Tag: Convergence (present in both), Divergence (stronger in interviews), 
+       Blog-Specific, or Interview-Specific.
+     - Read Evidence Notes detailing contextual differences.
+
+4.8 CONCEPTUAL FRAMEWORK MAPPING
+--------------------------------------------------------------------------------
+- Purpose: Map qualitative evidence to the theoretical model:
+  Physical & Social Constraints -> Perceived Safety -> Destination Image -> Travel Intention -> Well-Being
+- Step-by-Step Instructions:
+  1. Review Conceptual Model statement.
+  2. Inspect Framework Cards showing Theme -> Construct -> Verbatim Quote -> Document ID & Paragraph #.
+  3. Check Evidence Level Tag:
+     - Direct Evidence (explicit participant statement)
+     - Reasonable Interpretation (analytical inference)
+     - Theoretical Interpretation (broader theoretical link)
+
+4.9 VALIDATION AUDIT & METRIC TRACKING
+--------------------------------------------------------------------------------
+- Purpose: Maintain complete transparency and calculate researcher-model validation metrics.
+- Step-by-Step Instructions:
+  1. Inspect Metric Stat Boxes: Agreement Rate %, Precision, Recall, and F1 Score.
+  2. Scroll through the Audit Log table to view a full timestamped history of all 
+     researcher approvals, rejections, and modifications.
+
+4.10 BLIND MODEL TESTING WORKFLOW
+--------------------------------------------------------------------------------
+- Purpose: Run independent reliability tests to evaluate model coding quality on blind samples.
+- Step-by-Step Instructions:
+  1. Click "Run Blind Evaluation".
+  2. The system runs independent coding across the 9 target blog documents without showing labels.
+  3. Review output metrics: Documents Tested (9), Overall Agreement Rate %, Macro Precision, 
+     Macro Recall, and Macro F1 Score.
+  4. Inspect Disagreement Analysis: Review passages where model predictions differed from 
+     ground-truth labels to identify edge cases for researcher overrides.
+
+4.11 EXPORT & ACADEMIC REPORTS
+--------------------------------------------------------------------------------
+- Purpose: Download export packages for academic publication and CAQDAS integration.
+- Step-by-Step Instructions:
+  1. Excel Master Codebook: Click "Download Excel Codebook" to get a multi-tab workbook (.xlsx).
+  2. NVivo XML: Click "Download NVivo XML" to export QSR NVivo compatible coding structures.
+  3. Phase 3 Survey Items: Click "Download Survey Items (CSV)" to get 7-point Likert scale items.
+  4. Full Thematic Analysis Report: Click "Download Full Report (.md)" to export the complete report.
+
+
+5. OPERATIONAL BEST PRACTICES & TROUBLESHOOTING
+--------------------------------------------------------------------------------
+- Document Traceability: Never delete raw files once ingested; the database relies on 
+  Document IDs (BLOG_01, INT_01) to preserve verbatim quotation links.
+- Researcher Authority: If the model assigns a code or theme with low confidence, use 
+  the Codebook or Themes module to override the decision.
+- Vercel Deployment: The system is pre-configured for Vercel with serverless fallback 
+  to `/tmp/research.db` for instant hosting.
+================================================================================
