@@ -1,7 +1,7 @@
 """
 model_evaluator.py
 Model Validation & Evaluation Engine for Solo Female Travel Qualitative Research.
-Runs blind qualitative coding evaluation across the 9 target blog documents,
+Runs blind qualitative coding evaluation on active SQLite database segments (and disk corpus),
 computes precision, recall, F1-score, agreement rate, construct-level confusion metrics,
 and records validation logs in SQLite research.db.
 """
@@ -38,57 +38,83 @@ class ModelEvaluator:
         self.taxonomy = CONSTRUCT_TAXONOMY
 
     def run_full_corpus_evaluation(self) -> Dict[str, Any]:
-        """Runs thematic coding evaluation across all 9 blog documents."""
-        results_by_doc = []
-        all_segments = []
+        """Runs blind thematic coding evaluation across active SQLite database segments and document corpus."""
+        conn = get_db_connection()
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        # Query all active thematic segments from SQLite research.db
+        cursor.execute("""
+        SELECT s.id, s.doc_id, s.doc_type, s.paragraph_num, s.text, s.construct, s.sub_dimension, s.confidence, d.filename, d.title
+        FROM coded_segments s
+        LEFT JOIN documents d ON s.doc_id = d.doc_id
+        WHERE s.construct != 'General Travel Narrative' AND s.text IS NOT NULL AND LENGTH(s.text) > 15
+        """)
+        db_rows = cursor.fetchall()
+
         all_thematic_segments = []
+        doc_meta_map = {}
 
-        total_words = 0
-        total_paragraphs = 0
+        if db_rows:
+            for r in db_rows:
+                doc_name = r["filename"] or r["doc_id"]
+                if doc_name not in doc_meta_map:
+                    doc_meta_map[doc_name] = {
+                        "filename": doc_name,
+                        "title": r["title"] or doc_name,
+                        "doc_type": r["doc_type"],
+                        "thematic_segments_count": 0,
+                        "total_segments": 0,
+                        "dominant_construct": r["construct"]
+                    }
+                doc_meta_map[doc_name]["thematic_segments_count"] += 1
+                doc_meta_map[doc_name]["total_segments"] += 1
 
-        for doc_name in TARGET_9_DOCS:
-            fpath = os.path.join(BASE_DIR, doc_name)
-            if not os.path.exists(fpath):
-                print(f"[ModelEvaluator] Warning: File not found {doc_name}")
-                continue
+                all_thematic_segments.append({
+                    "id": r["id"],
+                    "source_id": doc_name,
+                    "text": r["text"],
+                    "primary_construct": r["construct"],
+                    "sub_dimension": r["sub_dimension"],
+                    "confidence": r["confidence"]
+                })
+        else:
+            # Fallback: Parse from disk if available
+            for doc_name in TARGET_9_DOCS:
+                fpath = os.path.join(BASE_DIR, doc_name)
+                if not os.path.exists(fpath):
+                    continue
+                try:
+                    with open(fpath, "rb") as f:
+                        content_bytes = f.read()
+                    doc_result = self.doc_analyzer.analyze_document_bytes(doc_name, content_bytes, doc_type="blog")
+                    if "error" not in doc_result:
+                        coded_segs = doc_result.get("coded_segments", [])
+                        thematic_segs = [s for s in coded_segs if s.get("is_thematic")]
+                        all_thematic_segments.extend(thematic_segs)
+                        doc_meta_map[doc_name] = {
+                            "filename": doc_name,
+                            "title": doc_result.get("title"),
+                            "thematic_segments_count": len(thematic_segs),
+                            "total_segments": doc_result.get("total_segments"),
+                            "dominant_construct": doc_result.get("dominant_construct")
+                        }
+                except Exception as e:
+                    print(f"[ModelEvaluator] Parse error for {doc_name}: {e}")
 
-            with open(fpath, "rb") as f:
-                content_bytes = f.read()
+        if not all_thematic_segments:
+            conn.close()
+            return {
+                "error": "No qualitative text segments available in database or disk for evaluation. Please upload documents first.",
+                "total_documents_tested": 0
+            }
 
-            doc_result = self.doc_analyzer.analyze_document_bytes(doc_name, content_bytes, doc_type="blog")
-            if "error" in doc_result:
-                continue
-
-            total_words += doc_result.get("word_count", 0)
-            total_paragraphs += doc_result.get("total_segments", 0)
-
-            coded_segs = doc_result.get("coded_segments", [])
-            thematic_segs = [s for s in coded_segs if s.get("is_thematic")]
-
-            all_segments.extend(coded_segs)
-            all_thematic_segments.extend(thematic_segs)
-
-            results_by_doc.append({
-                "filename": doc_name,
-                "title": doc_result.get("title"),
-                "word_count": doc_result.get("word_count"),
-                "total_segments": doc_result.get("total_segments"),
-                "thematic_segments_count": len(thematic_segs),
-                "thematic_density_pct": doc_result.get("thematic_density_pct"),
-                "dominant_construct": doc_result.get("dominant_construct"),
-                "dominant_emotional_tone": doc_result.get("dominant_emotional_tone")
-            })
-
-        # Fit a fresh hybrid QualitativeCoder on all corpus texts for blind evaluation
-        eval_coder = QualitativeCoder(min_confidence_threshold=0.12)
+        # Fit a fresh QualitativeCoder on all corpus texts for blind evaluation
+        eval_coder = QualitativeCoder(min_confidence_threshold=0.10)
         all_texts = [s["text"] for s in all_thematic_segments]
         eval_coder.fit(all_texts)
 
-        # Calculate Construct Level Performance Metrics
-        construct_counts = Counter([s["primary_construct"] for s in all_thematic_segments])
-        emotion_counts = Counter([s["emotional_tone"] for s in all_thematic_segments])
-
-        # Evaluate against ground truth
+        # Evaluate against ground-truth construct labels
         matches = 0
         disagreements = []
 
@@ -136,16 +162,13 @@ class ModelEvaluator:
         macro_recall = round(sum(m["recall"] for m in construct_metrics.values()) / len(construct_metrics), 2)
         macro_f1 = round(sum(m["f1_score"] for m in construct_metrics.values()) / len(construct_metrics), 2)
 
-        # Record run in SQLite DB
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        # Record test run in SQLite DB
         timestamp = datetime.now().isoformat()
-
         cursor.execute("""
         INSERT INTO model_test_runs (test_name, sample_size, agreement_rate, precision_score, recall_score, f1_score, disagreements_summary, timestamp)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-            "Full 9 Blog Corpus Evaluation", total_thematic, agreement_rate,
+            "Active Corpus Blind Evaluation", total_thematic, agreement_rate,
             macro_precision, macro_recall, macro_f1,
             json.dumps(disagreements[:10]), timestamp
         ))
@@ -155,25 +178,21 @@ class ModelEvaluator:
         INSERT INTO validations (entity_type, entity_id, ai_suggestion, researcher_decision, researcher_notes, timestamp)
         VALUES (?, ?, ?, ?, ?, ?)
         """, (
-            "model_eval", 9, "Full 9 Blog Benchmark", "Approved",
-            f"Evaluated on {len(TARGET_9_DOCS)} files. Agreement: {agreement_rate}%, Macro F1: {macro_f1}", timestamp
+            "model_eval", len(all_thematic_segments), "Corpus Blind Benchmark", "Approved",
+            f"Evaluated on {len(doc_meta_map)} documents ({total_thematic} segments). Agreement: {agreement_rate}%, F1: {macro_f1}", timestamp
         ))
 
         conn.commit()
         conn.close()
 
         return {
-            "total_documents_tested": len(results_by_doc),
-            "total_words_analyzed": total_words,
-            "total_paragraphs_analyzed": total_paragraphs,
+            "total_documents_tested": len(doc_meta_map),
             "total_thematic_segments": total_thematic,
             "overall_agreement_rate_pct": agreement_rate,
             "macro_precision": macro_precision,
             "macro_recall": macro_recall,
             "macro_f1_score": macro_f1,
-            "construct_frequencies": dict(construct_counts),
-            "emotion_distribution": dict(emotion_counts),
             "construct_metrics": construct_metrics,
-            "document_breakdown": results_by_doc,
+            "document_breakdown": list(doc_meta_map.values()),
             "sample_disagreements": disagreements[:8]
         }

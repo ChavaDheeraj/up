@@ -251,17 +251,133 @@ async def upload_and_analyze(
                 VALUES (?, ?, ?, ?, 1, 1, ?, 'Approved')
                 """, (code_name, f"Qualitative code for {code_name}", s.get("text", "")[:250], s.get("primary_construct"), s.get("confidence_score", 0.5)))
 
+    # Rebuild derived tables dynamically (Themes, Comparisons, Framework Mappings)
+    rebuild_derived_tables(conn)
     conn.commit()
     conn.close()
 
-    # Generate Excel byte report
-    excel_bytes = doc_analyzer_instance.generate_excel_bytes(result)
-    _last_upload_excel = excel_bytes
-    _last_upload_filename = f"{os.path.splitext(filename)[0]}_thematic_analysis.xlsx"
+    # Generate Excel byte report for download
+    try:
+        excel_bytes = doc_analyzer_instance.generate_excel_bytes(result)
+        _last_upload_excel = excel_bytes
+        _last_upload_filename = f"{os.path.splitext(filename)[0]}_thematic_analysis.xlsx"
+    except Exception as e:
+        print(f"[Upload] Excel generation warning: {e}")
 
     result["doc_id"] = doc_id
     result.pop("coded_segments", None)
     return result
+
+def rebuild_derived_tables(conn: sqlite3.Connection):
+    """
+    Rebuilds and syncs themes, cross-dataset comparisons, framework mappings, and contradictions
+    dynamically from stored coded_segments and documents in SQLite DB.
+    """
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    # 1. Sync codebook frequencies & doc counts
+    cursor.execute("""
+    SELECT sub_dimension as code_name, construct, COUNT(*) as freq, COUNT(DISTINCT doc_id) as doc_cnt, AVG(confidence) as avg_conf, MAX(text) as sample
+    FROM coded_segments
+    WHERE construct != 'General Travel Narrative' AND text IS NOT NULL
+    GROUP BY sub_dimension, construct
+    """)
+    code_rows = cursor.fetchall()
+    for r in code_rows:
+        c_name, construct, freq, doc_cnt, avg_conf, sample = r["code_name"], r["construct"], r["freq"], r["doc_cnt"], r["avg_conf"], r["sample"]
+        cursor.execute("SELECT id FROM codebook WHERE code_name=?", (c_name,))
+        existing = cursor.fetchone()
+        if existing:
+            cursor.execute("UPDATE codebook SET frequency=?, doc_count=?, confidence=?, construct=? WHERE id=?", (freq, doc_cnt, round(avg_conf, 3), construct, existing["id"]))
+        else:
+            cursor.execute("""
+            INSERT INTO codebook (code_name, definition, evidence_sample, construct, frequency, doc_count, confidence, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'Approved')
+            """, (c_name, f"Qualitative code for {c_name}", sample[:250], construct, freq, doc_cnt, round(avg_conf, 3)))
+
+    # 2. Rebuild candidate themes dynamically from coded_segments
+    cursor.execute("""
+    SELECT 
+        sub_dimension as theme_name,
+        construct,
+        COUNT(*) as total_ev,
+        SUM(CASE WHEN doc_type='blog' THEN 1 ELSE 0 END) as blog_cnt,
+        SUM(CASE WHEN doc_type='interview' THEN 1 ELSE 0 END) as int_cnt,
+        AVG(confidence) as avg_conf
+    FROM coded_segments
+    WHERE construct != 'General Travel Narrative' AND text IS NOT NULL
+    GROUP BY sub_dimension, construct
+    """)
+    theme_rows = cursor.fetchall()
+
+    for tr in theme_rows:
+        t_name, construct, total_ev, b_cnt, i_cnt, avg_conf = tr["theme_name"], tr["construct"], tr["total_ev"], tr["blog_cnt"], tr["int_cnt"], tr["avg_conf"]
+        cursor.execute("SELECT id FROM themes WHERE theme_name=?", (t_name,))
+        t_existing = cursor.fetchone()
+        
+        t_def = f"Emergent thematic cluster representing {t_name} indicators under {construct}."
+        rel_codes = json.dumps([t_name])
+        subthemes = json.dumps([f"Dimension of {construct}"])
+        rel_constructs = json.dumps([construct])
+        
+        if t_existing:
+            cursor.execute("""
+            UPDATE themes SET blog_frequency=?, interview_frequency=?, total_evidence_count=?, confidence=? WHERE id=?
+            """, (b_cnt, i_cnt, total_ev, round(avg_conf, 3), t_existing["id"]))
+        else:
+            cursor.execute("""
+            INSERT INTO themes (theme_name, definition, related_codes, subthemes, blog_frequency, interview_frequency, total_evidence_count, related_constructs, contradictory_evidence, confidence, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (t_name, t_def, rel_codes, subthemes, b_cnt, i_cnt, total_ev, rel_constructs, "Participant perspectives vary by destination context.", round(avg_conf, 3), "Approved"))
+
+    # 3. Rebuild Blog vs Interview Comparisons dynamically
+    cursor.execute("DELETE FROM comparisons")
+    cursor.execute("""
+    SELECT 
+        construct as theme_name,
+        SUM(CASE WHEN doc_type='blog' THEN 1 ELSE 0 END) as b_cnt,
+        SUM(CASE WHEN doc_type='interview' THEN 1 ELSE 0 END) as i_cnt
+    FROM coded_segments
+    WHERE construct != 'General Travel Narrative'
+    GROUP BY construct
+    """)
+    comp_rows = cursor.fetchall()
+
+    for cr in comp_rows:
+        c_name, b_cnt, i_cnt = cr["theme_name"], cr["b_cnt"], cr["i_cnt"]
+        b_status = f"Present ({b_cnt})" if b_cnt > 0 else "Absent"
+        i_status = f"Present ({i_cnt})" if i_cnt > 0 else "Absent"
+        if i_cnt > b_cnt and b_cnt > 0:
+            i_status = f"Stronger ({i_cnt})"
+        is_both = b_cnt > 0 and i_cnt > 0
+        c_type = "Convergence" if is_both and abs(b_cnt - i_cnt) <= 8 else ("Divergence" if is_both else ("Blog-Specific" if b_cnt > 0 else "Interview-Specific"))
+        diff_notes = f"Blogs contain {b_cnt} coded passages; interviews contain {i_cnt} coded passages."
+
+        cursor.execute("""
+        INSERT INTO comparisons (theme_name, blogs_status, interviews_status, is_both, difference_notes, type)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """, (c_name, b_status, i_status, is_both, diff_notes, c_type))
+
+    # 4. Rebuild Framework Mappings dynamically from top evidence quotes
+    cursor.execute("DELETE FROM framework_mappings")
+    cursor.execute("SELECT DISTINCT construct FROM coded_segments WHERE construct != 'General Travel Narrative'")
+    all_c = [r[0] for r in cursor.fetchall()]
+
+    for c_name in all_c:
+        cursor.execute("""
+        SELECT s.sub_dimension, s.text, s.doc_id, s.paragraph_num
+        FROM coded_segments s
+        WHERE s.construct = ? AND s.text IS NOT NULL
+        ORDER BY s.confidence DESC LIMIT 2
+        """, (c_name,))
+        quotes = cursor.fetchall()
+        for q in quotes:
+            interp = "Direct Evidence"
+            cursor.execute("""
+            INSERT INTO framework_mappings (theme_name, construct, evidence_quote, doc_id, paragraph_num, interpretation_level)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """, (q["sub_dimension"], c_name, q["text"], q["doc_id"], q["paragraph_num"], interp))
 
 # ── 3. Documents List & Familiarisation ──
 @app.get("/api/documents")
